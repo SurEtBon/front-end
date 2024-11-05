@@ -1,9 +1,5 @@
 import streamlit as st
-import geopandas as gpd
-import google.auth.exceptions
-import google.cloud.exceptions
 import pandas as pd
-import os
 import logging
 
 from google.oauth2 import service_account
@@ -15,20 +11,28 @@ from shapely import Geometry
 from shapely import to_wkt
 
 
-
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 logger.addHandler(console_handler)
 
+
 # Check for invalid geometries in osm_geo
 def check_for_invalid_geometries(df: pd.DataFrame) -> None:
-    invalid_geometries = df[df['osm_geo'].apply(lambda x: not isinstance(x, Geometry) or x.is_empty)]
+    invalid_geometries = df[
+        df["osm_geo"].apply(lambda x: not isinstance(x, Geometry) or x.is_empty)
+    ]
     print(f"Number of invalid geometries: {len(invalid_geometries)}")
 
-def convert_geometry_to_WKT_format_for_arrow_compatibility(df: pd.DataFrame) -> pd.DataFrame:
+
+def convert_geometry_to_WKT_format_for_arrow_compatibility(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
     # Convert geometry to WKT format for Arrow compatibility
-    df['osm_geo'] = df['osm_geo'].apply(lambda geom: to_wkt(geom) if isinstance(geom, Geometry) else None)
+    df["osm_geo"] = df["osm_geo"].apply(
+        lambda geom: to_wkt(geom) if isinstance(geom, Geometry) else None
+    )
     return df
+
 
 def main():
     try:
@@ -63,11 +67,13 @@ def main():
         # pyarrow.lib.ArrowTypeError: ('Did not pass numpy.dtype object',
         # 'Conversion failed for column osm_geo with type geometry')
 
-
     except DefaultCredentialsError as e:
-        logging.error(f"Error: {e}. Check environment variables and service account credentials.")
+        logging.error(
+            f"Error: {e}. Check environment variables and service account credentials."
+        )
         logging.info("Loading data from local `parquet` file..")
         df = pd.read_parquet("data/restaurant_matching_sample.parquet")
+
 
 if __name__ == "__main__":
     main()
