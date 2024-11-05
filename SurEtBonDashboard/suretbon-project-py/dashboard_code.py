@@ -4,6 +4,7 @@ import geopandas as gpd
 from shapely import wkb
 import folium
 
+
 data =  pd.read_parquet("/home/donatien.konan.pro/code/donat-konan33/de-project-2024/front-end/data/restaurant_matching.parquet")
 
 # Convertir la colonne WKB en géométries
