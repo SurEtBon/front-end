@@ -75,13 +75,15 @@ gdf = gdf[mask]
 
 m = folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles="cartodb positron")
 
+
 folium.GeoJson(
     gdf,
-    tooltip=folium.features.GeoJsonTooltip(fields=["osm_clean_name"])
+    tooltip=folium.features.GeoJsonTooltip(fields=["osm_clean_name"]),
 ).add_to(m)
 
 st_data = st_folium(m, width=725)
 
 st.write("Getting last clicked object on the map")
-st.write(type(st_data))
-st.write(st_data["last_clicked"])
+st.write(st_data["last_object_clicked"])
+st.write(st_data["last_object_clicked_tooltip"])
+st.write(st_data["last_object_clicked_popup"])
