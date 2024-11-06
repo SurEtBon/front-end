@@ -9,6 +9,7 @@ from google.cloud import bigquery
 from google.auth.exceptions import DefaultCredentialsError
 
 from streamlit_folium import st_folium
+from streamlit_folium import folium_static
 from shapely import wkb
 
 try:
@@ -79,38 +80,7 @@ folium.GeoJson(
     tooltip=folium.features.GeoJsonTooltip(fields=["osm_clean_name"])
 ).add_to(m)
 
-st_data = st_folium(m, width=725)
+st_data = folium_static(m, width=725)
 
 st.write("Getting last clicked object on the map")
 st.write(st_data['last_clicked'])
-
-"""
-tile design options : https://leaflet-extras.github.io/leaflet-providers/preview/
-
-var Stadia_AlidadeSmooth = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
-	minZoom: 0,
-	maxZoom: 20,
-	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	ext: 'png'
-});
-
-var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
-	minZoom: 0,
-	maxZoom: 20,
-	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	ext: 'png'
-});
-
-
-Provider names for leaflet-providers.js
-Stadia.OSMBright
-Plain JavaScript:
-var Stadia_OSMBright = L.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.{ext}', {
-	minZoom: 0,
-	maxZoom: 20,
-	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	ext: 'png'
-});
-
-
-"""
