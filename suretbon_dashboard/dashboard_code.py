@@ -2,7 +2,6 @@ import folium
 import geopandas as gpd
 import pandas as pd
 import streamlit as st
-import os
 import logging
 
 from google.oauth2 import service_account
@@ -11,8 +10,6 @@ from google.auth.exceptions import DefaultCredentialsError
 
 from streamlit_folium import st_folium
 from shapely import wkb
-from shapely import Geometry
-from shapely import to_wkt
 
 try:
     # Create API client.
