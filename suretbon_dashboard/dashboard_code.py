@@ -32,7 +32,7 @@ try:
         rows = [dict(row) for row in rows_raw]
         return rows
 
-    query = """SELECT * FROM `algebraic-link-440513-f9.intermediate.int_join_restaurants` LIMIT 1000"""
+    query = """SELECT * FROM `algebraic-link-440513-f9.mart.restaurants_final_matching` LIMIT 200"""
     results = run_query(query)
 
     df = pd.DataFrame(results)
