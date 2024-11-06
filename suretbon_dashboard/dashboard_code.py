@@ -81,6 +81,8 @@ folium.GeoJson(
 
 st_data = st_folium(m, width=725)
 
+st.write("Getting last clicked object on the map")
+st.write(st_data['last_clicked'])
 
 """
 tile design options : https://leaflet-extras.github.io/leaflet-providers/preview/
