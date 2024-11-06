@@ -2,49 +2,22 @@ import folium
 import geopandas as gpd
 import pandas as pd
 import streamlit as st
-import logging
-
-from google.oauth2 import service_account
-from google.cloud import bigquery
-from google.auth.exceptions import DefaultCredentialsError
 
 from streamlit_folium import st_folium
-from streamlit_folium import folium_static
 from shapely import wkb
 
-try:
-    # Create API client.
-    credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"]
-    )
-    client = bigquery.Client(credentials=credentials)
-    logging.info("Big Query client successfully created")
+from utils import load_data
+from utils import write_clicked_restaurant_data
 
-    # Perform query.
-    # Uses st.cache_data to only rerun when the query changes or after 1 hour.
-    @st.cache_data(ttl=3600)
-    def run_query(query):
-        query_job = client.query(query)
-        rows_raw = query_job.result()
-        # Convert to list of dicts. Required for st.cache_data to hash the return value.
-        rows = [dict(row) for row in rows_raw]
-        return rows
+st.set_page_config(layout="wide")
 
-    query = """
-        SELECT *
-        FROM `algebraic-link-440513-f9.mart.restaurants_final_matching`
-        LIMIT 200
-        """
-    results = run_query(query)
+query = """
+    SELECT *
+    FROM `algebraic-link-440513-f9.mart.restaurants_final_matching`
+    LIMIT 1000
+    """
 
-    df = pd.DataFrame(results)
-
-except DefaultCredentialsError as e:
-    logging.error(
-        f"Error: {e}. Check environment variables and service account credentials."
-    )
-    logging.info("Loading data from local `parquet` file..")
-    df = pd.read_parquet("data/restaurant_matching_sample.parquet")
+df = load_data(query)
 
 # convert geospatial data into type that works with pandas
 df["geopandas_osm"] = df["geopandas_osm"].apply(wkb.loads)
@@ -73,6 +46,7 @@ gdf = gdf[columns_to_keep]
 mask = gdf["distance_name_label"] <= 3
 gdf = gdf[mask]
 
+address = st.text_input("Adresse")
 m = folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles="cartodb positron")
 
 
@@ -82,8 +56,30 @@ folium.GeoJson(
 ).add_to(m)
 
 st_data = st_folium(m, width=725)
+st.write(dict(st_data))
 
-st.write("Getting last clicked object on the map")
-st.write(st_data["last_object_clicked"])
-st.write(st_data["last_object_clicked_tooltip"])
-st.write(st_data["last_object_clicked_popup"])
+with st.sidebar:
+    st_data = dict(st_data)
+    display_data = st_data["last_active_drawing"]["properties"]
+
+    name = display_data["osm_name"]
+    st.write("**Name**")
+    name = display_data["osm_name"]
+    st.write(name)
+    st.divider()
+
+
+    stars = display_data["stars"]
+    st.write("**Stars**")
+    st.write(stars)
+    st.divider()
+
+
+    eval = display_data["app_code_synthese_eval_sanit"]
+    st.write("**Evaluation**")
+    st.write(eval)
+    st.divider()
+
+    synthese = display_data["synthese_eval_sanit"]
+    st.write("**Synthese**")
+    st.write(synthese)
