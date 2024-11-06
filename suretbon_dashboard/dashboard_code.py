@@ -80,8 +80,8 @@ folium.GeoJson(
     tooltip=folium.features.GeoJsonTooltip(fields=["osm_clean_name"])
 ).add_to(m)
 
-st_data = folium_static(m, width=725)
+st_data = st_folium(m, width=725)
 
 st.write("Getting last clicked object on the map")
 st.write(type(st_data))
-st.write([el for el in st_data])
+st.write(st_data["last_clicked"])
