@@ -20,8 +20,8 @@ try:
     logging.info("Big Query client successfully created")
 
     # Perform query.
-    # Uses st.cache_data to only rerun when the query changes or after 10 min.
-    @st.cache_data(ttl=600)
+    # Uses st.cache_data to only rerun when the query changes or after 1 hour.
+    @st.cache_data(ttl=3600)
     def run_query(query):
         query_job = client.query(query)
         rows_raw = query_job.result()
@@ -41,39 +41,21 @@ except DefaultCredentialsError as e:
     logging.info("Loading data from local `parquet` file..")
     df = pd.read_parquet("data/restaurant_matching_sample.parquet")
 
-col1, col2 = st.columns(2)
 
-with col1:
-    st.write("sourced data: data types")
-    st.write(df.dtypes.tolist())
-
-with col2:
-    st.dataframe(df)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.write("converted geodataframe : data types")
-    df["geopandas_osm"] = df["geopandas_osm"].apply(wkb.loads)
-    # convert to GeoDataFrame
-    gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
-    st.write(gdf.dtypes.tolist())
-
-with col2:
-    st.dataframe(gdf)
+st.write("converted geodataframe : data types")
+df["geopandas_osm"] = df["geopandas_osm"].apply(wkb.loads)
+# convert to GeoDataFrame
+gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
 
 columns_to_keep = [
     "osm_name",
     "type",
     "osm_clean_name",
-    #"geo_osm",
     "geopandas_osm",
     "osm_siret",
     "alimconfiance_name",
     "alimconfiance_clean_name",
     "alimconfiance_siret",
-    #"geo_alimconfiance",
-    #"geopandas_alimconfiance",
     "distance_name_label",
     "stars",
     "synthese_eval_sanit",
