@@ -29,7 +29,11 @@ try:
         rows = [dict(row) for row in rows_raw]
         return rows
 
-    query = """SELECT * FROM `algebraic-link-440513-f9.mart.restaurants_final_matching` LIMIT 200"""
+    query = """
+        SELECT *
+        FROM `algebraic-link-440513-f9.mart.restaurants_final_matching`
+        LIMIT 200
+        """
     results = run_query(query)
 
     df = pd.DataFrame(results)
@@ -41,12 +45,13 @@ except DefaultCredentialsError as e:
     logging.info("Loading data from local `parquet` file..")
     df = pd.read_parquet("data/restaurant_matching_sample.parquet")
 
-
-st.write("converted geodataframe : data types")
+# convert geospatial data into type that works with pandas
 df["geopandas_osm"] = df["geopandas_osm"].apply(wkb.loads)
+
 # convert to GeoDataFrame
 gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
 
+# filter out some columns
 columns_to_keep = [
     "osm_name",
     "type",
@@ -61,11 +66,10 @@ columns_to_keep = [
     "synthese_eval_sanit",
     "app_code_synthese_eval_sanit",
 ]
-st.write(f"keep only these columns: {columns_to_keep}")
 gdf = gdf[columns_to_keep]
 
+# keep only these rows with levenshtein_distance <= 3
 mask = gdf["distance_name_label"] <= 3
-st.write(f"keep only these rows with levenshtein_distance <= 3")
 gdf = gdf[mask]
 
 m = folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles="cartodb positron")
