@@ -83,4 +83,5 @@ folium.GeoJson(
 st_data = folium_static(m, width=725)
 
 st.write("Getting last clicked object on the map")
-st.write(st_data['last_clicked'])
+st.write(type(st_data))
+st.write([el for el in st_data])
