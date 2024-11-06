@@ -7,7 +7,7 @@ from streamlit_folium import st_folium
 from shapely import wkb
 
 from utils import load_data
-from utils import write_clicked_restaurant_data
+from utils import CODE_DESCRIPTION
 
 st.set_page_config(layout="wide")
 
@@ -28,15 +28,9 @@ gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
 # filter out some columns
 columns_to_keep = [
     "osm_name",
-    "type",
     "osm_clean_name",
     "geopandas_osm",
-    "osm_siret",
-    "alimconfiance_name",
-    "alimconfiance_clean_name",
-    "alimconfiance_siret",
     "distance_name_label",
-    "stars",
     "synthese_eval_sanit",
     "app_code_synthese_eval_sanit",
 ]
@@ -63,23 +57,25 @@ with st.sidebar:
     display_data = st_data["last_active_drawing"]["properties"]
 
     name = display_data["osm_name"]
+    full_address = display_data["full_address"]
     st.write("**Name**")
-    name = display_data["osm_name"]
     st.write(name)
+    st.write("**Adresse**")
+    st.write(full_address)
+
     st.divider()
-
-
-    stars = display_data["stars"]
-    st.write("**Stars**")
-    st.write(stars)
-    st.divider()
-
 
     eval = display_data["app_code_synthese_eval_sanit"]
-    st.write("**Evaluation**")
-    st.write(eval)
-    st.divider()
-
     synthese = display_data["synthese_eval_sanit"]
-    st.write("**Synthese**")
-    st.write(synthese)
+    st.write("**Evaluation**")
+    st.write(eval + " - " + synthese)
+    st.write(CODE_DESCRIPTION[eval])
+
+
+
+    # adresse_2_ua
+# code_postal
+# libelle_commune
+
+# dernière date d'inspections
+
