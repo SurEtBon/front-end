@@ -19,8 +19,8 @@ RUN apt-get update \
 RUN echo -n $SECRETS | base64 --decode > /app/.streamlit/secrets.toml && \
     echo -n $CONFIG| base64 --decode > /app/.streamlit/config.toml
 
-COPY ./suretbondashboard/utils.py /app/utils.py
-COPY ./suretbondashboard/dashboard_code.py /app/dashboard_code.py
+COPY ./suretbon_dashboard/utils.py /app/utils.py
+COPY ./suretbon_dashboard/dashboard_code.py /app/dashboard_code.py
 
 EXPOSE 8501
 
