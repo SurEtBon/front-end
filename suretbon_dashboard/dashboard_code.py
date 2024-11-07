@@ -53,7 +53,7 @@ def get_feature_style(feature):
         1: "green",
         2: "blue",
         3: "black",
-        4: "red"
+        4: "purple"
     }
     return {
         "color": color_map.get(eval_code, "gray"),  # Default to gray if code not matched
