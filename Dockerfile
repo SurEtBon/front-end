@@ -16,6 +16,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /app/.streamlit
 
+COPY ./assets /app/assets
 COPY ./suretbon_dashboard/utils.py /app/utils.py
 COPY ./suretbon_dashboard/dashboard_code.py /app/dashboard_code.py
 
