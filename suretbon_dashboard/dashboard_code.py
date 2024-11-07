@@ -44,7 +44,7 @@ columns_to_keep = [
 ]
 gdf = gdf[columns_to_keep]
 
-
+#st.write(st.session_state)
 ######### HANDLE ADDRESS SEARCH BAR #########
 # search bar for an address
 search_term = st.text_input("Adresse")
@@ -101,33 +101,26 @@ st_data = st_folium(m, width=725)
 ######### DISPLAY SIDE BAR #########
 with st.sidebar:
     st_data = dict(st_data)
-    display_data = st_data["last_active_drawing"]["properties"]
+    if st_data.get("last_active_drawing"):
+        display_data = st_data["last_active_drawing"]["properties"]
 
-    name = display_data["osm_name"]
-    full_address = display_data["full_address"]
-    st.write("**Nom de l'établissement**")
-    st.write(name)
-    st.write("**Adresse**")
-    st.write(full_address)
+        name = display_data["osm_name"]
+        full_address = display_data["full_address"]
+        st.write("**Nom de l'établissement**")
+        st.write(name)
+        st.write("**Adresse**")
+        st.write(full_address)
 
-    st.divider()
+        st.divider()
 
-    eval = display_data["app_code_synthese_eval_sanit"]
-    synthese = display_data["synthese_eval_sanit"]
-    st.write("**Evaluation**")
-    st.write(str(eval) + " - " + synthese)
-    st.write(CODE_DESCRIPTION[eval])
-    st.write(f"Date de la dernière inspection : {display_data['date_inspection']}")
-    st.write(f"Nombre d'inspection(s) : {display_data['nb_inspections']}")
+        eval = display_data["app_code_synthese_eval_sanit"]
+        synthese = display_data["synthese_eval_sanit"]
+        st.write("**Evaluation**")
+        st.write(str(eval) + " - " + synthese)
+        st.write(CODE_DESCRIPTION[eval])
+        st.write(f"Date de la dernière inspection : {display_data['date_inspection']}")
+        st.write(f"Nombre d'inspection(s) : {display_data['nb_inspections']}")
 
-
-    st.write(st_data)
-
-
-
-    # adresse_2_ua
-# code_postal
-# libelle_commune
-
-# dernière date d'inspections
-
+        st.write(st_data)
+    else:
+        st.write("**Cliquez sur un établissement pour voir les détails**")
