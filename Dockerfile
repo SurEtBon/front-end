@@ -16,12 +16,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /app/.streamlit
 
-RUN echo -n $SECRETS | base64 --decode > /app/.streamlit/secrets.toml && \
-    echo -n $CONFIG| base64 --decode > /app/.streamlit/config.toml
-
 COPY ./suretbon_dashboard/utils.py /app/utils.py
 COPY ./suretbon_dashboard/dashboard_code.py /app/dashboard_code.py
 
+COPY ./entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 8501
 
-ENTRYPOINT ["poetry", "run", "streamlit", "run", "/app/dashboard_code.py"]
+ENTRYPOINT ["entrypoint.sh"]
