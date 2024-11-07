@@ -1,3 +1,4 @@
+import geopandas as gpd
 import pandas as pd
 import streamlit as st
 import logging
@@ -7,7 +8,8 @@ from google.cloud import bigquery
 from google.auth.exceptions import DefaultCredentialsError
 
 from geopy.geocoders import Nominatim
-from geopy.distance import geodesic
+from shapely.geometry import Point
+
 
 CODE_DESCRIPTION = {
     1: "**Niveau d'hygiène très satisfaisant** : établissements ne présentant pas de non-conformité, ou présentant uniquement des non-conformités mineures.",
@@ -49,19 +51,23 @@ def load_data(query):
 
     return df
 
-def write_clicked_restaurant_data(st_data):
-    st_data = dict(st_data)
-    display_data = st_data["last_active_drawing"]["properties"]
-    name = display_data["osm_name"]
-    stars = display_data["stars"]
-    name = display_data["osm_name"]
-    eval = display_data["app_code_synthese_eval_sanit"]
-    synthese = display_data["synthese_eval_sanit"]
+def get_feature_style(feature):
+    eval_code = feature["properties"]["app_code_synthese_eval_sanit"]  # Access the app_code_synthese_eval_sanit value
+    color_map = {
+        1: "green",
+        2: "blue",
+        3: "orange",
+        4: "red"
+    }
+    return {
+        "color": color_map.get(eval_code, "gray"),  # Border color
+        "fill": True,
+        "fillColor": color_map.get(eval_code, "gray"),  # Fill color
+        "weight": 3,
+        "fillOpacity": 0.8,
+        "radius": 6
+    }
 
-    return dict(name=name,
-                stars=stars,
-                eval=eval,
-                synthese=synthese)
 
 @st.cache_data(ttl=1800)
 def geocode_address(address):
@@ -71,3 +77,42 @@ def geocode_address(address):
         return (location.longitude, location.latitude)
     else:
         return None
+
+def center_map_to_searched_term(search_term, gdf):
+        # Définir le point de référence (par exemple, un point à Paris)
+        coor_geo = geocode_address(search_term)
+
+        # Convertir le GeoDataFrame dans un CRS projeté pour calculer les distances (par ex., EPSG:3857)
+        gdf = gdf.to_crs(epsg=3857)
+
+        center_lat = coor_geo[1]
+        center_lon = coor_geo[0]
+        reference_point = Point(center_lon, center_lat)  # Coordonnées de Paris
+        reference_point_gdf = gpd.GeoSeries([reference_point], crs="EPSG:4326").to_crs(epsg=3857)[0]
+
+        # Spécifier le rayon en mètres (ex. : 10 km)
+        radius = 1000  # 10 km
+
+        # Filtrer les points dans le rayon
+        gdf['distance'] = gdf.geometry.distance(reference_point_gdf)
+        gdf = gdf[gdf['distance'] <= radius]
+        return gdf
+
+
+def write_clicked_restaurant_data(st_data):
+    #TO DO : check if side pannel refreshes properly
+    st_data = dict(st_data)
+    display_data = st_data["last_active_drawing"]["properties"]
+    name = display_data["osm_name"]
+    google_rating = display_data["google_rating"]
+    tripadvisor_rating = display_data["tripadvisor_rating"]
+    name = display_data["osm_name"]
+    eval = display_data["app_code_synthese_eval_sanit"]
+    synthese = display_data["synthese_eval_sanit"]
+
+    return dict(name=name,
+                eval=eval,
+                synthese=synthese,
+                google_rating=google_rating,
+                tripadvisor_rating=tripadvisor_rating
+                )

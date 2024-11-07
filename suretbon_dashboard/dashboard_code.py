@@ -5,12 +5,12 @@ import streamlit as st
 
 from streamlit_folium import st_folium
 from shapely import wkb
-from shapely.geometry import Point
 
-from utils import load_data
-from utils import write_clicked_restaurant_data
-from utils import geocode_address
 from utils import CODE_DESCRIPTION
+from utils import load_data
+from utils import center_map_to_searched_term
+from utils import get_feature_style
+from utils import write_clicked_restaurant_data
 
 ######### CONFIG LAYOUT, DEFINE QUERY, LOAD DATA #########
 st.set_page_config(layout="wide")
@@ -33,18 +33,16 @@ gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
 # filter out some columns
 columns_to_keep = [
     "osm_name",
-    "osm_clean_name",
     "geopandas_osm",
-    "distance_name_label",
     "synthese_eval_sanit",
     "app_code_synthese_eval_sanit",
     "full_address",
     "nb_inspections",
     "date_inspection",
+    "google_rating"
 ]
 gdf = gdf[columns_to_keep]
 
-#st.write(st.session_state)
 ######### HANDLE ADDRESS SEARCH BAR #########
 # search bar for an address
 search_term = st.text_input("Adresse")
@@ -54,43 +52,10 @@ center_lat = 48.8566
 center_lon = 2.3522
 
 if search_term:
-    # Définir le point de référence (par exemple, un point à Paris)
-    coor_geo = geocode_address(search_term)
-
-    # Convertir le GeoDataFrame dans un CRS projeté pour calculer les distances (par ex., EPSG:3857)
-    gdf = gdf.to_crs(epsg=3857)
-
-    center_lat = coor_geo[1]
-    center_lon = coor_geo[0]
-    reference_point = Point(center_lon, center_lat)  # Coordonnées de Paris
-    reference_point_gdf = gpd.GeoSeries([reference_point], crs="EPSG:4326").to_crs(epsg=3857)[0]
-
-    # Spécifier le rayon en mètres (ex. : 10 km)
-    radius = 1000  # 10 km
-
-    # Filtrer les points dans le rayon
-    gdf['distance'] = gdf.geometry.distance(reference_point_gdf)
-    gdf = gdf[gdf['distance'] <= radius]
+    gdf = center_map_to_searched_term(search_term, gdf)
 
 ######### SHOW MAP #########
 m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="cartodb positron")
-
-def get_feature_style(feature):
-    eval_code = feature["properties"]["app_code_synthese_eval_sanit"]  # Access the app_code_synthese_eval_sanit value
-    color_map = {
-        1: "green",
-        2: "blue",
-        3: "orange",
-        4: "red"
-    }
-    return {
-        "color": color_map.get(eval_code, "gray"),  # Border color
-        "fill": True,
-        "fillColor": color_map.get(eval_code, "gray"),  # Fill color
-        "weight": 3,
-        "fillOpacity": 0.8,
-        "radius": 6
-    }
 
 folium.GeoJson(
     gdf,
@@ -113,7 +78,6 @@ with st.sidebar:
         st.write(name)
         st.write("**Adresse**")
         st.write(full_address)
-
         st.divider()
 
         eval = display_data["app_code_synthese_eval_sanit"]
@@ -123,7 +87,13 @@ with st.sidebar:
         st.write(CODE_DESCRIPTION[eval])
         st.write(f"Date de la dernière inspection : {display_data['date_inspection']}")
         st.write(f"Nombre d'inspection(s) : {display_data['nb_inspections']}")
+        st.divider()
 
-        st.write(st_data)
+        google_rating = display_data["google_rating"]
+        st.write("**Note sur Google**")
+        st.write(f"{display_data['google_rating']}")
+        tripadvisor_rating = display_data["tripadvisor_rating"]
+        st.write("**Note sur Tripadvisor**")
+        st.write(f"{display_data['tripadvisor_rating']}")
     else:
         st.write("**Cliquez sur un établissement pour voir les détails**")
