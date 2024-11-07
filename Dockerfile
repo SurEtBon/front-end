@@ -13,7 +13,8 @@ RUN apt-get update \
     && pip3 install --no-cache-dir poetry \
     && poetry install --only main \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /app/.streamlit
 
 RUN echo -n $SECRETS | base64 --decode > /app/.streamlit/secrets.toml && \
     echo -n $CONFIG| base64 --decode > /app/.streamlit/config.toml
