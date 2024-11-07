@@ -39,7 +39,10 @@ columns_to_keep = [
     "full_address",
     "nb_inspections",
     "date_inspection",
-    "google_rating"
+    "google_rating",
+    "google_nb_rating",
+    "tripadvisor_rating",
+    "tripadvisor_nb_rating"
 ]
 gdf = gdf[columns_to_keep]
 
@@ -84,16 +87,14 @@ with st.sidebar:
         synthese = display_data["synthese_eval_sanit"]
         st.write("**Evaluation**")
         st.write(str(eval) + " - " + synthese)
+        st.write("**Note sur Google**")
+        st.write(f"{display_data['google_rating']}/5 *({display_data['google_nb_rating']} reviews)*")
+        st.write("**Note sur Tripadvisor**")
+        st.write(f"{display_data['tripadvisor_rating']}/5 *({display_data['tripadvisor_nb_rating']} reviews)*")
+        st.divider()
+
         st.write(CODE_DESCRIPTION[eval])
         st.write(f"Date de la dernière inspection : {display_data['date_inspection']}")
         st.write(f"Nombre d'inspection(s) : {display_data['nb_inspections']}")
-        st.divider()
-
-        google_rating = display_data["google_rating"]
-        st.write("**Note sur Google**")
-        st.write(f"{display_data['google_rating']}")
-        tripadvisor_rating = display_data["tripadvisor_rating"]
-        st.write("**Note sur Tripadvisor**")
-        st.write(f"{display_data['tripadvisor_rating']}")
     else:
         st.write("**Cliquez sur un établissement pour voir les détails**")
