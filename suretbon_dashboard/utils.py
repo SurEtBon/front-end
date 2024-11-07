@@ -2,6 +2,7 @@ import geopandas as gpd
 import pandas as pd
 import streamlit as st
 import logging
+from PIL import Image
 
 from google.oauth2 import service_account
 from google.cloud import bigquery
@@ -90,8 +91,8 @@ def center_map_to_searched_term(search_term, gdf):
         reference_point = Point(center_lon, center_lat)  # Coordonnées de Paris
         reference_point_gdf = gpd.GeoSeries([reference_point], crs="EPSG:4326").to_crs(epsg=3857)[0]
 
-        # Spécifier le rayon en mètres (ex. : 10 km)
-        radius = 1000  # 10 km
+        # set the radius
+        radius = 1000  # 1 km
 
         # Filtrer les points dans le rayon
         gdf['distance'] = gdf.geometry.distance(reference_point_gdf)
@@ -116,3 +117,18 @@ def write_clicked_restaurant_data(st_data):
                 google_rating=google_rating,
                 tripadvisor_rating=tripadvisor_rating
                 )
+
+# define app logo
+def load_logo():
+    """
+    the Logo of SûrEtBon
+    """
+
+    image_path = "assets/SurEtBon.svg"
+    with open(image_path, "r") as svg_file :
+        svg_content = svg_file.read()
+    svg_content = svg_content.replace(
+    "<svg", '<svg style="background-color: white;"'
+)
+    # image = Image.open(image_path) , pillow lirairy not support svg file
+    return svg_content
