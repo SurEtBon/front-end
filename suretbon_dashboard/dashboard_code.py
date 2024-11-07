@@ -80,23 +80,26 @@ def get_feature_style(feature):
     color_map = {
         1: "green",
         2: "blue",
-        3: "black",
-        4: "purple"
+        3: "orange",
+        4: "red"
     }
     return {
-        "color": color_map.get(eval_code, "gray"),  # Default to gray if code not matched
-        "weight": 2,
-        "fillOpacity": 0.6
+        "color": color_map.get(eval_code, "gray"),  # Border color
+        "fill": True,
+        "fillColor": color_map.get(eval_code, "gray"),  # Fill color
+        "weight": 3,
+        "fillOpacity": 0.8,
+        "radius": 6
     }
 
 folium.GeoJson(
     gdf,
     tooltip=folium.features.GeoJsonTooltip(fields=["osm_name"]),
-    marker=folium.Circle(radius=300), #, fill_color="orange", fill_opacity=0.4, color="black", weight=1),
+    marker=folium.CircleMarker(),
     style_function=get_feature_style
 ).add_to(m)
 
-st_data = st_folium(m, width=725)
+st_data = st_folium(m, width=900)
 
 ######### DISPLAY SIDE BAR #########
 with st.sidebar:
