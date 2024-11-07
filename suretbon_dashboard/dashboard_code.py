@@ -11,9 +11,28 @@ from utils import load_data
 from utils import center_map_to_searched_term
 from utils import get_feature_style
 from utils import write_clicked_restaurant_data
+from utils import load_logo
 
 ######### CONFIG LAYOUT, DEFINE QUERY, LOAD DATA #########
 st.set_page_config(layout="wide")
+
+
+###### HEADER ######
+col1, col2 = st.columns(2)
+with col1:
+    with st.container():
+        with st.header(""):
+            st.markdown("""
+                        ## Bienvenue sur notre Application **SûrEtBon**
+                        Saisir son adresse pour voir les restaurants les plus proches
+
+                        ----
+                        """)
+
+        with col2:
+            img = load_logo()
+            st.components.v1.html(img, width= 200, height=150)
+
 
 query = """
     SELECT *
@@ -33,6 +52,7 @@ gdf = gpd.GeoDataFrame(df, geometry="geopandas_osm", crs="EPSG:4326")
 # filter out some columns
 columns_to_keep = [
     "osm_name",
+    "type",
     "geopandas_osm",
     "synthese_eval_sanit",
     "app_code_synthese_eval_sanit",
@@ -45,6 +65,8 @@ columns_to_keep = [
     "tripadvisor_nb_rating"
 ]
 gdf = gdf[columns_to_keep]
+
+#
 
 ######### HANDLE ADDRESS SEARCH BAR #########
 # search bar for an address
@@ -60,9 +82,11 @@ if search_term:
 ######### SHOW MAP #########
 m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="cartodb positron")
 
+field = ["osm_name", "type"]
+aliases = ["Etablissement | ", "Type d'établissement | "]
 folium.GeoJson(
     gdf,
-    tooltip=folium.features.GeoJsonTooltip(fields=["osm_name"]),
+    tooltip=folium.features.GeoJsonTooltip(fields=field, aliases=aliases),
     marker=folium.CircleMarker(),
     style_function=get_feature_style
 ).add_to(m)
@@ -71,6 +95,9 @@ st_data = st_folium(m, width=900)
 
 ######### DISPLAY SIDE BAR #########
 with st.sidebar:
+    img = load_logo()
+    st.components.v1.html(img, width= 200, height=150)
+    st.divider()
     st_data = dict(st_data)
     if st_data.get("last_active_drawing"):
         display_data = st_data["last_active_drawing"]["properties"]
@@ -98,3 +125,11 @@ with st.sidebar:
         st.write(f"Nombre d'inspection(s) : {display_data['nb_inspections']}")
     else:
         st.write("**Cliquez sur un établissement pour voir les détails**")
+
+st.markdown(
+    """
+    ----
+    Important :
+    Les données sanitaires proviennent de relevés issus de la DGAL. Cliquez [ici](https://agriculture.gouv.fr/mots-cles/dgal) pour plus d'informations
+    """
+)
