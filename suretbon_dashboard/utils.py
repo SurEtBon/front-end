@@ -6,6 +6,8 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 from google.auth.exceptions import DefaultCredentialsError
 
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
 
 def load_data(query):
     try:
@@ -53,3 +55,12 @@ def write_clicked_restaurant_data(st_data):
                 stars=stars,
                 eval=eval,
                 synthese=synthese)
+
+@st.cache_data(ttl=1800)
+def geocode_address(address):
+    geolocator = Nominatim(user_agent="SûrEtBon", timeout=10)
+    location = geolocator.geocode(address)
+    if location:
+        return (location.longitude, location.latitude)
+    else:
+        return None
