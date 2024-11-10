@@ -10,7 +10,6 @@ from utils import CODE_DESCRIPTION
 from utils import load_data
 from utils import center_map_to_searched_term
 from utils import get_feature_style
-from utils import write_clicked_restaurant_data
 from utils import load_logo
 
 ######### CONFIG LAYOUT, DEFINE QUERY, LOAD DATA #########
@@ -76,24 +75,62 @@ search_term = st.text_input("Adresse")
 center_lat = 48.8566
 center_lon = 2.3522
 
-if search_term:
-    gdf = center_map_to_searched_term(search_term, gdf)
-
-######### SHOW MAP #########
 m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="cartodb positron")
-
 field = ["osm_name", "type"]
 aliases = ["Etablissement | ", "Type d'établissement | "]
-folium.GeoJson(
-    gdf,
+
+gdf1 = None
+if search_term:
+    try:
+        gdf1 = center_map_to_searched_term(search_term, gdf)
+
+    except AssertionError :
+        st.write("Il n'existe pas d'établissement évalué par la DGAL dans un rayon de 1 km.")
+        st.divider()
+
+    except TypeError :
+        st.write("Adresse incorrecte, veuillez réssayer.")
+    except NameError :
+        st.write("Adresse incorrecte, veuillez réssayer.")
+    except Exception :
+        st.write("Adresse incorrecte, veuillez réssayer.")
+
+######### SHOW gdf MAP #########
+
+if gdf1 is None :
+    folium.GeoJson(
+        gdf,
+        tooltip=folium.features.GeoJsonTooltip(fields=field, aliases=aliases),
+        marker=folium.CircleMarker(),
+        style_function=get_feature_style
+    ).add_to(m)
+
+    st_data = st_folium(m, width=900)
+
+elif len(gdf1) == 0 :  # gdf1.empty
+    st.write("Il n'existe pas d'établissement évalué par la DGAL dans un rayon de 1 km.")
+    folium.GeoJson(
+        gdf,
+        tooltip=folium.features.GeoJsonTooltip(fields=field, aliases=aliases),
+        marker=folium.CircleMarker(),
+        style_function=get_feature_style
+    ).add_to(m)
+    st_data = st_folium(m, width=900)
+
+######### SHOW gdf1 MAP #########
+else:
+    folium.GeoJson(
+    gdf1,
     tooltip=folium.features.GeoJsonTooltip(fields=field, aliases=aliases),
     marker=folium.CircleMarker(),
     style_function=get_feature_style
 ).add_to(m)
 
-st_data = st_folium(m, width=900)
+    st_data = st_folium(m, width=900)
+
 
 ######### DISPLAY SIDE BAR #########
+
 with st.sidebar:
     img = load_logo()
     st.components.v1.html(img, width= 200, height=150)
@@ -126,10 +163,11 @@ with st.sidebar:
     else:
         st.write("**Cliquez sur un établissement pour voir les détails**")
 
+
 st.markdown(
     """
     ----
     Important :
-    Les données sanitaires proviennent de relevés issus de la DGAL. Cliquez [ici](https://agriculture.gouv.fr/mots-cles/dgal) pour plus d'informations
+    Les données sanitaires proviennent de relevés issus de la DGAL. Cliquez [ici](https://agriculture.gouv.fr/mots-cles/dgal) pour plus d'informations.
     """
 )
